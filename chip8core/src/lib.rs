@@ -164,7 +164,7 @@ impl Emu{
             (7, _, _, _) => {
                 let x = digit2 as usize;
                 let nn = (op & 0x00FF) as u8;
-                self.v_reg[x] += self.v_reg[x].wrapping_add(nn);
+                self.v_reg[x] = self.v_reg[x].wrapping_add(nn);
             },
             (8, _, _, 0) => {
                 let x = digit2 as usize;
@@ -175,6 +175,16 @@ impl Emu{
                 let x = digit2 as usize;
                 let y = digit3 as usize;
                 self.v_reg[x] |= self.v_reg[y];
+            },
+            (8, _, _, 2) => {
+                let x = digit2 as usize;
+                let y = digit3 as usize;
+                self.v_reg[x] &= self.v_reg[y];
+            },
+            (8, _, _, 3) => {
+                let x = digit2 as usize;
+                let y = digit3 as usize;
+                self.v_reg[x] ^= self.v_reg[y];
             },
             (8, _, _, 4) => {
                 let x = digit2 as usize;
@@ -324,15 +334,11 @@ impl Emu{
             },
             (0xF, _, 3, 3) => {
                 let x = digit2 as usize;
-                let vx = self.v_reg[x] as f32;
+                let vx = self.v_reg[x];
 
-                let hundreds = (vx/100.0).floor() as u8;
-                let tens = (vx/10.0).floor() as u8;
-                let ones = (vx%10.0).floor() as u8;
-
-                self.memory[self.i_reg as usize] = hundreds;
-                self.memory[(self.i_reg + 1) as usize] = tens;
-                self.memory[(self.i_reg + 2) as usize] = ones;
+                self.memory[self.i_reg as usize] = vx/100;
+                self.memory[(self.i_reg + 1) as usize] = (vx/10) % 10;
+                self.memory[(self.i_reg + 2) as usize] = vx % 10;
             },
             (0xF, _, 5, 5) => {
                 let x = digit2 as usize;
